@@ -5,8 +5,8 @@ updates:
     schedule:
       interval: weekly
     groups:
-      spring:
-        patterns: ["org.springframework*"]
+      maven-minor-and-patch:
+        update-types: [minor, patch]
     commit-message:
       prefix: "build(deps)"
 
@@ -14,6 +14,20 @@ updates:
     directory: /frontend
     schedule:
       interval: weekly
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+    ignore:
+      # @types/node tracks the Node.js runtime (22 LTS), not the latest release.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # Major toolchain upgrades are done deliberately, once eslint-config-next supports them.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "build(deps)"
 
@@ -21,6 +35,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
     commit-message:
       prefix: "ci(deps)"
 
