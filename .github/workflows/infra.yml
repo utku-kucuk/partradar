@@ -1,0 +1,30 @@
+name: Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "deploy/compose/**"
+      - "Makefile"
+      - ".github/workflows/infra.yml"
+  pull_request:
+    paths:
+      - "deploy/compose/**"
+      - "Makefile"
+      - ".github/workflows/infra.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    name: Validate Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate compose file (all profiles)
+        run: docker compose -f deploy/compose/compose.yaml --profile apps config --quiet
+      - name: Validate Keycloak realm
+        run: jq empty deploy/compose/keycloak/partradar-realm.json
+      - name: Makefile targets are documented
+        run: make help

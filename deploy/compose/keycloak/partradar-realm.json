@@ -1,0 +1,61 @@
+{
+  "realm": "partradar",
+  "enabled": true,
+  "displayName": "PartRadar",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "sslRequired": "external",
+  "accessTokenLifespan": 900,
+  "roles": {
+    "realm": [
+      { "name": "CUSTOMER", "description": "Drivers and mechanics who ask for parts" },
+      { "name": "SHOP_OWNER", "description": "Shops that answer inquiries with quotes" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "partradar-web",
+      "name": "PartRadar web app",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:3000/*"],
+      "webOrigins": ["http://localhost:3000"],
+      "attributes": { "pkce.code.challenge.method": "S256", "post.logout.redirect.uris": "http://localhost:3000/*" }
+    },
+    {
+      "clientId": "partradar-e2e",
+      "name": "End-to-end tests",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "customer@partradar.dev",
+      "email": "customer@partradar.dev",
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Customer",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "demo", "temporary": false }],
+      "realmRoles": ["CUSTOMER"]
+    },
+    {
+      "username": "shop@partradar.dev",
+      "email": "shop@partradar.dev",
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Shop",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "demo", "temporary": false }],
+      "realmRoles": ["SHOP_OWNER"]
+    }
+  ]
+}
