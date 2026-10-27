@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "deploy/compose/**"
+      - "deploy/helm/partradar/files/keycloak/**"
       - "Makefile"
       - ".github/workflows/infra.yml"
   pull_request:
     paths:
       - "deploy/compose/**"
+      - "deploy/helm/partradar/files/keycloak/**"
       - "Makefile"
       - ".github/workflows/infra.yml"
 
