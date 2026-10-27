@@ -1,8 +1,11 @@
 # syntax=docker/dockerfile:1
 # Builds one service image from the Maven reactor.
 #   docker build -f deploy/docker/Dockerfile --build-arg SERVICE=shop-service -t partradar/shop-service .
+#
+# The jar is platform independent, so the build stage always runs on the native platform of the builder;
+# only the runtime stage is assembled for each target platform (linux/amd64, linux/arm64).
 
-FROM eclipse-temurin:25-jdk AS build
+FROM --platform=$BUILDPLATFORM eclipse-temurin:25-jdk AS build
 ARG SERVICE
 WORKDIR /workspace
 COPY .mvn .mvn
