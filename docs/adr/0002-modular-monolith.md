@@ -1,6 +1,6 @@
 # 2. Modular monolith with Spring Modulith
 
-**Status:** Accepted
+**Status:** Superseded by [0004](0004-microservices.md)
 
 ## Context
 The domain has clear sub-areas (identity, shops, catalog, inquiries, routing, inventory, billing, ...) but the team is one

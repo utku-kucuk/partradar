@@ -1,6 +1,6 @@
 # 3. Cloud Run + Neon + Vercel on free tiers
 
-**Status:** Accepted
+**Status:** Superseded by [0006](0006-kubernetes-with-helm.md)
 
 ## Context
 The project runs on demo data and must cost nothing per month, while still using a production-style platform with
