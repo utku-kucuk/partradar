@@ -1,0 +1,10 @@
+# Only the Maven reactor is needed to build service images.
+**/target/
+**/node_modules/
+frontend/
+docs/
+deploy/
+.git/
+.github/
+*.iml
+.idea/
