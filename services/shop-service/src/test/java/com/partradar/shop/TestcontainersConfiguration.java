@@ -9,8 +9,9 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class TestcontainersConfiguration {
 
+  // Same multi-arch PostGIS image as deploy/compose (postgis/postgis is amd64 only).
   static final DockerImageName POSTGRES =
-      DockerImageName.parse("postgis/postgis:17-3.5").asCompatibleSubstituteFor("postgres");
+      DockerImageName.parse("imresamu/postgis:17-3.6").asCompatibleSubstituteFor("postgres");
 
   @Bean
   @ServiceConnection

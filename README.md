@@ -105,8 +105,8 @@ partradar/
 ## Roadmap
 - [x] Repository, CI, code scanning and release automation
 - [x] Architecture decisions (microservices, messaging, Kubernetes)
-- [ ] Multi-module build and service skeletons
-- [ ] Local infrastructure with Docker Compose
+- [x] Multi-module build and service skeletons
+- [x] Local infrastructure with Docker Compose
 - [ ] Shops and nearby search
 - [ ] Inquiries, quotes and outbox to Kafka
 - [ ] Routing inquiries to nearby shops
@@ -118,7 +118,35 @@ partradar/
 - [ ] `v0.1.0`
 
 ## Getting started
-_Coming with the first service milestone._ The full system will start locally with `make k8s-up`.
+**Prerequisites:** JDK 25 and Docker (Docker Desktop, OrbStack or Colima) with about 6 GB of memory.
+
+```bash
+make up          # build the images and start infrastructure + all services
+make ps          # container status
+make down        # stop everything (data is kept; `make infra-reset` deletes it)
+```
+
+To work on one service from the IDE or the command line, start only the infrastructure:
+
+```bash
+make infra-up
+make run SERVICE=shop-service
+```
+
+`make help` lists every target. `make build` runs formatting checks and all tests (Testcontainers needs Docker).
+
+| What | URL | Credentials |
+|---|---|---|
+| API gateway | http://localhost:8080 | — |
+| Service APIs (OpenAPI) | http://localhost:8081/swagger-ui.html (shop), `:8082` (inquiry) | — |
+| Keycloak | http://localhost:8180 | `admin` / `admin` |
+| Demo users (realm `partradar`) | — | `customer@partradar.dev`, `shop@partradar.dev` / `demo` |
+| Kafka UI | http://localhost:8085 | — |
+| RabbitMQ management | http://localhost:15672 | `partradar` / `partradar` |
+| Mailpit (captured e-mail) | http://localhost:8025 | — |
+| Grafana (metrics, logs, traces) | http://localhost:3001 | `admin` / `admin` |
+
+All credentials are local development defaults.
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md). Commits follow [Conventional Commits](https://www.conventionalcommits.org);
