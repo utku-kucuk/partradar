@@ -14,6 +14,8 @@ spring:
 server:
   port: ${PORT:8083}
   shutdown: graceful
+  # Runs behind the gateway / ingress: build links from X-Forwarded-* headers.
+  forward-headers-strategy: framework
 
 management:
   endpoints:
