@@ -2,4 +2,4 @@ apiVersion: v2
 name: partradar-service
 description: Shared templates for a PartRadar Spring Boot service (Deployment, Service, ConfigMap, HPA)
 type: library
-version: 0.1.0
+version: 0.2.0
