@@ -161,10 +161,11 @@ make k8s-down    # delete the cluster
 
 | What | URL |
 |---|---|
-| API gateway | http://api.localtest.me |
-| Keycloak | http://auth.localtest.me (`admin` / `admin`) |
+| API gateway | http://partradar.localtest.me/api |
+| Keycloak | http://partradar.localtest.me/auth (`admin` / `admin`) |
 
 `*.localtest.me` resolves to `127.0.0.1`; kind forwards port 80 to the ingress controller.
+The layout matches the live environment: one host, the gateway under `/api` and Keycloak under `/auth`.
 Images for `main` and every release are published to GHCR for `linux/amd64` and `linux/arm64`.
 
 ## Contributing

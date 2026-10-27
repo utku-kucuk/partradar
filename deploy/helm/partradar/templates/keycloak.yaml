@@ -8,6 +8,9 @@ metadata:
 data:
   partradar-realm.json: |-
     {{- .Files.Get "files/keycloak/partradar-realm.json" | nindent 4 }}
+{{- $adminSecret := .Values.keycloak.admin.existingSecret | default "keycloak-admin" }}
+{{- $db := include "partradar.db" . }}
+{{- if not .Values.keycloak.admin.existingSecret }}
 ---
 apiVersion: v1
 kind: Secret
@@ -20,6 +23,7 @@ type: Opaque
 stringData:
   username: {{ .Values.keycloak.admin.username | quote }}
   password: {{ .Values.keycloak.admin.password | quote }}
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -50,19 +54,37 @@ spec:
       containers:
         - name: keycloak
           image: {{ .Values.keycloak.image }}
-          args: ["start-dev", "--import-realm"]
+          args: ["start", "--import-realm"]
           env:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
-                secretKeyRef: { name: keycloak-admin, key: username }
+                secretKeyRef: { name: {{ $adminSecret }}, key: username }
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
-                secretKeyRef: { name: keycloak-admin, key: password }
+                secretKeyRef: { name: {{ $adminSecret }}, key: password }
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://{{ $db }}-rw:5432/keycloak"
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef: { name: {{ $db }}-app, key: username }
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: {{ $db }}-app, key: password }
+            # TLS ends at the edge (ingress / Cloudflare); Keycloak serves plain HTTP inside the cluster.
+            - name: KC_HTTP_ENABLED
+              value: "true"
             - name: KC_HTTP_PORT
               value: "8180"
+            - name: KC_HTTP_RELATIVE_PATH
+              value: /auth
+            # Health endpoints stay at /health on the management port.
+            - name: KC_HTTP_MANAGEMENT_RELATIVE_PATH
+              value: /
             # Tokens are issued for the public URL, whichever address a request comes in on.
             - name: KC_HOSTNAME
-              value: "{{ .Values.hosts.scheme }}://{{ .Values.hosts.auth }}"
+              value: "{{ .Values.scheme }}://{{ .Values.host }}/auth"
             - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
               value: "true"
             - name: KC_PROXY_HEADERS

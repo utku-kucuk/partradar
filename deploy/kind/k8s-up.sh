@@ -47,4 +47,4 @@ helm upgrade --install partradar deploy/helm/partradar \
 
 kubectl -n "$NAMESPACE" get pods
 echo
-echo "API gateway: http://api.localtest.me   Keycloak: http://auth.localtest.me (admin / admin)"
+echo "API: http://partradar.localtest.me/api   Keycloak: http://partradar.localtest.me/auth (admin / admin)"
