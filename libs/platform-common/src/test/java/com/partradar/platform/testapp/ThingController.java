@@ -4,6 +4,9 @@ import com.partradar.platform.web.BusinessRuleException;
 import com.partradar.platform.web.NotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,5 +29,11 @@ class ThingController {
   @PostMapping("/things")
   String create(@Valid @RequestBody NewThing thing) {
     return thing.name();
+  }
+
+  @GetMapping("/owner-only")
+  @PreAuthorize("hasRole('SHOP_OWNER')")
+  String ownerOnly(@AuthenticationPrincipal Jwt jwt) {
+    return jwt.getSubject();
   }
 }
