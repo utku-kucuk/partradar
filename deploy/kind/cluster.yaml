@@ -1,0 +1,10 @@
+# Local reference cluster (ADR-0006): one node, host port 80 forwarded to the ingress controller.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: partradar
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
