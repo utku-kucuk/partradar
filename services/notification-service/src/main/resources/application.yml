@@ -4,10 +4,18 @@ spring:
   threads:
     virtual:
       enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Tokens are issued by Keycloak; signing keys are discovered lazily on the first request.
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/partradar}
 
 server:
   port: ${PORT:8083}
   shutdown: graceful
+  # Runs behind the gateway / ingress: build links from X-Forwarded-* headers.
+  forward-headers-strategy: framework
 
 management:
   endpoints:

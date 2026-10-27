@@ -18,6 +18,9 @@ x-service: &service
   restart: unless-stopped
   environment: &service-env
     SPRING_PROFILES_ACTIVE: prod
+    # Tokens carry the host-facing issuer; keys are fetched over the compose network.
+    KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/partradar
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/partradar/protocol/openid-connect/certs
     DATABASE_USERNAME: partradar
     DATABASE_PASSWORD: partradar
 

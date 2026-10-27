@@ -2,10 +2,12 @@ package com.partradar.platform;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.partradar.platform.testapp.TestApplication;
+import com.partradar.platform.testapp.TestJwtDecoderConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(classes = TestApplication.class)
+@SpringBootTest(classes = {TestApplication.class, TestJwtDecoderConfiguration.class})
 @AutoConfigureMockMvc
 class PlatformAutoConfigurationTests {
 
@@ -53,5 +55,18 @@ class PlatformAutoConfigurationTests {
     mvc.perform(post("/things").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"\"}"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors.name").exists());
+  }
+
+  @Test
+  void bearerTokenRealmRolesBecomeAuthorities() throws Exception {
+    mvc.perform(get("/owner-only").header("Authorization", "Bearer SHOP_OWNER"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("user-shop_owner"));
+  }
+
+  @Test
+  void missingRoleIsForbidden() throws Exception {
+    mvc.perform(get("/owner-only").header("Authorization", "Bearer CUSTOMER"))
+        .andExpect(status().isForbidden());
   }
 }
