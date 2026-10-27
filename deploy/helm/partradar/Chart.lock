@@ -1,0 +1,6 @@
+dependencies:
+- name: partradar-service
+  repository: file://../library/partradar-service
+  version: 0.1.0
+digest: sha256:16f950e253d9968e75ee40bd4ddd7899c6d5cba8ea4be9d87eaacfb6bdfc424e
+generated: "2026-10-27T12:17:34.217901+03:00"

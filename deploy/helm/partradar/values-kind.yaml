@@ -1,0 +1,15 @@
+# Local kind cluster (make k8s-up): images are built and loaded into the node, no registry.
+global:
+  image:
+    registry: partradar
+    tag: local
+    pullPolicy: Never
+
+# *.localtest.me resolves to 127.0.0.1; kind maps host port 80 to the ingress controller.
+hosts:
+  api: api.localtest.me
+  auth: auth.localtest.me
+  scheme: http
+
+postgres:
+  storage: 1Gi

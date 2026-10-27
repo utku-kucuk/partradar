@@ -109,7 +109,8 @@ services:
     ports:
       - "8180:8180"
     volumes:
-      - ./keycloak:/opt/keycloak/data/import:ro
+      # The realm lives with the Helm chart so compose and Kubernetes import the same file.
+      - ../helm/partradar/files/keycloak:/opt/keycloak/data/import:ro
     healthcheck:
       # The image has no curl; query the management port with bash.
       test:
