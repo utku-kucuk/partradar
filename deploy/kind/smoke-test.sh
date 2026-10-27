@@ -25,7 +25,13 @@ trap 'rm -f "$body" "$headers"' EXIT
 shop='{"name":"Smoke Test Parts","phone":"+90 212 555 00 00","address":"Ikitelli OSB, Istanbul",
        "latitude":41.0712,"longitude":28.8026,"categories":["ENGINE","BRAKES"]}'
 
-status=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API/api/shops" -H 'Content-Type: application/json' -d "$shop")
+# A pod that just turned ready can take a moment to be reachable through its Service (endpoint
+# propagation), so wait until a request travels ingress -> gateway -> shop-service and back.
+for _ in $(seq 1 60); do
+  status=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API/api/shops" -H 'Content-Type: application/json' -d "$shop")
+  [[ "$status" == 401 ]] && break
+  sleep 2
+done
 expect_status 401 "$status" "register without a token is rejected"
 
 sign_in() { # username
