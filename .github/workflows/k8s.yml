@@ -11,6 +11,8 @@ on:
       - "deploy/docker/**"
       - "deploy/helm/**"
       - "deploy/kind/**"
+      - "deploy/argocd/**"
+      - "deploy/oracle/**"
       - "Makefile"
       - ".github/workflows/k8s.yml"
   pull_request:

@@ -1,0 +1,23 @@
+name: Uptime
+
+# Checks the live environment every 15 minutes: Keycloak serves the realm and a request travels
+# Cloudflare -> tunnel -> gateway -> shop-service (401 without a token).
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Live environment
+    # Set the repository variable LIVE_URL (https://partradar.utkukucuk.com) once the environment is up.
+    if: vars.LIVE_URL != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Keycloak realm
+        run: test "$(curl -s -o /dev/null -w '%{http_code}' --retry 3 "${{ vars.LIVE_URL }}/auth/realms/partradar")" = 200
+      - name: Gateway to shop-service
+        run: test "$(curl -s -o /dev/null -w '%{http_code}' --retry 3 "${{ vars.LIVE_URL }}/api/shops/nearby?lat=41&lon=29")" = 401
