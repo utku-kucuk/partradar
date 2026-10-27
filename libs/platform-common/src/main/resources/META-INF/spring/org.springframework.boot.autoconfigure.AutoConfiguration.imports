@@ -1,0 +1,2 @@
+com.partradar.platform.security.PlatformSecurityAutoConfiguration
+com.partradar.platform.web.PlatformWebAutoConfiguration

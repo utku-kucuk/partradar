@@ -1,4 +1,4 @@
-# Local development services. Spring Boot starts these automatically (spring-boot-docker-compose).
+# Local development services.
 services:
   postgres:
     image: postgis/postgis:17-3.5
