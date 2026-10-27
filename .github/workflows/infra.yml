@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "deploy/compose/**"
+      - "deploy/helm/partradar/files/keycloak/**"
       - "Makefile"
       - ".github/workflows/infra.yml"
   pull_request:
     paths:
       - "deploy/compose/**"
+      - "deploy/helm/partradar/files/keycloak/**"
       - "Makefile"
       - ".github/workflows/infra.yml"
 
@@ -25,6 +27,6 @@ jobs:
       - name: Validate compose file (all profiles)
         run: docker compose -f deploy/compose/compose.yaml --profile apps config --quiet
       - name: Validate Keycloak realm
-        run: jq empty deploy/compose/keycloak/partradar-realm.json
+        run: jq empty deploy/helm/partradar/files/keycloak/partradar-realm.json
       - name: Makefile targets are documented
         run: make help

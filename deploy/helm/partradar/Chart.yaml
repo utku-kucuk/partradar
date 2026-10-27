@@ -1,0 +1,12 @@
+apiVersion: v2
+name: partradar
+description: PartRadar services with PostgreSQL (CloudNativePG) and Keycloak
+type: application
+version: 0.1.0
+# Image tag used when global.image.tag is empty.
+appVersion: "main"
+home: https://github.com/utku-kucuk/partradar
+dependencies:
+  - name: partradar-service
+    version: 0.1.0
+    repository: file://../library/partradar-service

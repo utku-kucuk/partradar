@@ -1,0 +1,17 @@
+# Traefik on kind: listen on the node's port 80 (mapped to the host), same controller as k3s.
+ports:
+  web:
+    hostPort: 80
+  websecure:
+    expose:
+      default: false
+service:
+  type: ClusterIP
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+providers:
+  kubernetesIngress:
+    enabled: true
+  kubernetesCRD:
+    enabled: false

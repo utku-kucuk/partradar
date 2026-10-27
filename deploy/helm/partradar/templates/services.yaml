@@ -1,0 +1,12 @@
+{{- range $name, $values := .Values.services }}
+{{- $service := mergeOverwrite (deepCopy $.Values.serviceDefaults) $values }}
+{{- with $service.database }}
+{{- $db := include "partradar.db" $ }}
+{{- $_ := set $service.env "DATABASE_URL" (printf "jdbc:postgresql://%s-rw:5432/%s" $db .) }}
+{{- $_ := set $service "secretEnv" (dict
+      "DATABASE_USERNAME" (dict "secret" (printf "%s-app" $db) "key" "username")
+      "DATABASE_PASSWORD" (dict "secret" (printf "%s-app" $db) "key" "password")) }}
+{{- end }}
+---
+{{ include "partradar-service.all" (dict "root" $ "name" $name "service" $service) }}
+{{- end }}

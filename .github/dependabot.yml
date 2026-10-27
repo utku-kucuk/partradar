@@ -47,3 +47,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: "build(deps)"
+
+  - package-ecosystem: helm
+    directory: /deploy/helm/partradar
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "build(deps)"

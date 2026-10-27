@@ -1,0 +1,41 @@
+{{- $db := include "partradar.db" . }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ $db }}
+  labels:
+    {{- include "partradar.labels" . | nindent 4 }}
+spec:
+  instances: {{ .Values.postgres.instances }}
+  imageName: {{ .Values.postgres.imageName }}
+  storage:
+    size: {{ .Values.postgres.storage }}
+  bootstrap:
+    initdb:
+      # Owner of every service database; credentials land in the Secret <cluster>-app.
+      database: {{ .Values.postgres.owner }}
+      owner: {{ .Values.postgres.owner }}
+  resources:
+    {{- toYaml .Values.postgres.resources | nindent 4 }}
+{{- range $name, $database := .Values.postgres.databases }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: {{ $db }}-{{ $name }}
+  labels:
+    {{- include "partradar.labels" $ | nindent 4 }}
+spec:
+  cluster:
+    name: {{ $db }}
+  name: {{ $name }}
+  owner: {{ $.Values.postgres.owner }}
+  {{- with $database.extensions }}
+  # Created by the operator as superuser, so the services' migrations need no elevated rights.
+  extensions:
+    {{- range . }}
+    - name: {{ . }}
+      ensure: present
+    {{- end }}
+  {{- end }}
+{{- end }}

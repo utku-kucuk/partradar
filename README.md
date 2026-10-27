@@ -107,13 +107,14 @@ partradar/
 - [x] Architecture decisions (microservices, messaging, Kubernetes)
 - [x] Multi-module build and service skeletons
 - [x] Local infrastructure with Docker Compose
-- [ ] Shops and nearby search
+- [x] Shops and nearby search
 - [ ] Inquiries, quotes and outbox to Kafka
 - [ ] Routing inquiries to nearby shops
 - [ ] Notifications over RabbitMQ with retries and DLQ
 - [ ] Gateway with Keycloak and resilience
 - [ ] Observability
-- [ ] Helm charts, kind cluster and end-to-end tests in CI
+- [x] Helm charts, kind cluster and end-to-end smoke test in CI
+- [ ] Live environment on Oracle Cloud (k3s + Argo CD)
 - [ ] Web app flows
 - [ ] `v0.1.0`
 
@@ -147,6 +148,24 @@ make run SERVICE=shop-service
 | Grafana (metrics, logs, traces) | http://localhost:3001 | `admin` / `admin` |
 
 All credentials are local development defaults.
+
+### Run on Kubernetes (kind)
+The same Helm chart that CI tests runs on a local [kind](https://kind.sigs.k8s.io) cluster
+(needs `kind`, `helm` and `kubectl`, about 6 GB of memory for Docker):
+
+```bash
+make k8s-up      # create the cluster, install Traefik + CloudNativePG, build the images, install the chart
+make k8s-smoke   # sign in with Keycloak, register a shop through the gateway, find it nearby
+make k8s-down    # delete the cluster
+```
+
+| What | URL |
+|---|---|
+| API gateway | http://api.localtest.me |
+| Keycloak | http://auth.localtest.me (`admin` / `admin`) |
+
+`*.localtest.me` resolves to `127.0.0.1`; kind forwards port 80 to the ingress controller.
+Images for `main` and every release are published to GHCR for `linux/amd64` and `linux/arm64`.
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md). Commits follow [Conventional Commits](https://www.conventionalcommits.org);

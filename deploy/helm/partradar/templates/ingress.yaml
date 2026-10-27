@@ -1,0 +1,35 @@
+{{- if .Values.ingress.enabled }}
+{{- $routes := list (dict "name" "api" "host" .Values.hosts.api "service" "api-gateway" "port" (index .Values.services "api-gateway").port)
+                    (dict "name" "auth" "host" .Values.hosts.auth "service" "keycloak" "port" 8180) }}
+{{- range $routes }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- include "partradar.labels" $ | nindent 4 }}
+  {{- with $.Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ $.Values.ingress.className }}
+  {{- with $.Values.ingress.tlsSecretName }}
+  tls:
+    - hosts: [{{ $.Values.hosts.api }}, {{ $.Values.hosts.auth }}]
+      secretName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ .host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .service }}
+                port:
+                  number: {{ .port }}
+{{- end }}
+{{- end }}

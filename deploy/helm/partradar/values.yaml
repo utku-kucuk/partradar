@@ -1,0 +1,75 @@
+global:
+  image:
+    registry: ghcr.io/utku-kucuk
+    # Empty: use the chart's appVersion. CI and Argo CD set it to a release or commit tag.
+    tag: ""
+    pullPolicy: IfNotPresent
+
+# Public host names. Tokens carry the issuer as the browser sees it, so services validate
+# against the public Keycloak URL and fetch signing keys inside the cluster.
+hosts:
+  api: api.partradar.local
+  auth: auth.partradar.local
+  scheme: https
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations: {}
+  # Secret name for TLS; empty disables TLS on the Ingress.
+  tlsSecretName: ""
+
+postgres:
+  # CloudNativePG cluster, one database per service (ADR-0004).
+  instances: 1
+  # PostGIS on PostgreSQL 17, built by the CloudNativePG project for amd64 and arm64.
+  imageName: ghcr.io/cloudnative-pg/postgis:17-3.6-system-trixie
+  storage: 2Gi
+  owner: partradar
+  databases:
+    shop:
+      extensions: [postgis, pg_trgm]
+    inquiry: {}
+    notification: {}
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 512Mi }
+
+keycloak:
+  image: quay.io/keycloak/keycloak:26.8.1
+  # Development mode with the realm imported on start; replaced by a production setup with its own database later.
+  admin:
+    username: admin
+    password: admin
+  resources:
+    requests: { cpu: 100m, memory: 512Mi }
+    limits: { memory: 768Mi }
+
+# Shared defaults merged into every service below.
+serviceDefaults:
+  resources:
+    requests: { cpu: 100m, memory: 384Mi }
+    limits: { memory: 512Mi }
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+  env:
+    KEYCLOAK_ISSUER_URI: "{{ .Values.hosts.scheme }}://{{ .Values.hosts.auth }}/realms/partradar"
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/partradar/protocol/openid-connect/certs
+
+services:
+  api-gateway:
+    port: 8080
+    env:
+      SHOP_SERVICE_URL: http://shop-service:8081
+      INQUIRY_SERVICE_URL: http://inquiry-service:8082
+  shop-service:
+    port: 8081
+    database: shop
+  inquiry-service:
+    port: 8082
+    database: inquiry
+  notification-service:
+    port: 8083

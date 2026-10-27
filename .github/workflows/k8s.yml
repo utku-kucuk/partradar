@@ -1,0 +1,70 @@
+name: Kubernetes
+
+on:
+  push:
+    branches: [main]
+    paths: &paths
+      - "pom.xml"
+      - ".mvn/**"
+      - "libs/**"
+      - "services/**"
+      - "deploy/docker/**"
+      - "deploy/helm/**"
+      - "deploy/kind/**"
+      - "Makefile"
+      - ".github/workflows/k8s.yml"
+  pull_request:
+    paths: *paths
+
+concurrency:
+  group: k8s-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  HELM_VERSION: v4.3.1
+  KUBECONFORM_VERSION: v0.8.0
+
+jobs:
+  lint:
+    name: Helm lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-helm@v5
+        with:
+          version: ${{ env.HELM_VERSION }}
+      - name: Install kubeconform
+        run: |
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin kubeconform
+      - name: Lint and validate manifests
+        run: make helm-lint
+
+  kind:
+    name: kind smoke test
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-helm@v5
+        with:
+          version: ${{ env.HELM_VERSION }}
+      - uses: helm/kind-action@v1
+        with:
+          config: deploy/kind/cluster.yaml
+          cluster_name: partradar
+      - name: Install the chart
+        run: make k8s-up
+      - name: Smoke test
+        run: make k8s-smoke
+      - name: Cluster diagnostics
+        if: failure()
+        run: |
+          kubectl get pods -A -o wide
+          kubectl -n partradar describe pods
+          for d in api-gateway shop-service inquiry-service notification-service keycloak; do
+            echo "::group::logs $d"; kubectl -n partradar logs deploy/$d --tail=200 || true; echo "::endgroup::"
+          done
