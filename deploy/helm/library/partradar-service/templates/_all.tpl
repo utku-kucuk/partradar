@@ -4,6 +4,7 @@ Usage: include "partradar-service.all" (dict "root" $ "name" "shop-service" "ser
 
 $values:
   port          HTTP port of the application (also used by the Kubernetes Service)
+  tag           image tag of this service, overrides global.image.tag
   env           map of plain environment variables, rendered into a ConfigMap
   secretEnv     map of NAME -> {secret, key} read from existing Secrets
   replicas      default 1, ignored when autoscaling is enabled

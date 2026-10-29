@@ -14,8 +14,12 @@ app.kubernetes.io/managed-by: {{ .root.Release.Service }}
 helm.sh/chart: {{ printf "%s-%s" .root.Chart.Name .root.Chart.Version }}
 {{- end }}
 
-{{/* Image reference: <registry>/partradar-<name>:<tag>, tag defaults to the chart's appVersion. */}}
+{{/*
+Image reference: <registry>/partradar-<name>:<tag>. The tag is the service's own `tag` (set per image by
+Argo CD Image Updater), else global.image.tag, else the chart's appVersion.
+*/}}
 {{- define "partradar-service.image" -}}
 {{- $image := .root.Values.global.image -}}
-{{- printf "%s/partradar-%s:%s" $image.registry .name (default .root.Chart.AppVersion $image.tag) -}}
+{{- $tag := .service.tag | default $image.tag | default .root.Chart.AppVersion -}}
+{{- printf "%s/partradar-%s:%s" $image.registry .name $tag -}}
 {{- end }}

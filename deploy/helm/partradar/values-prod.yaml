@@ -1,0 +1,16 @@
+# Live environment (ADR-0007): k3s on Oracle Cloud, reached only through a Cloudflare Tunnel.
+# Image tags per service are set by Argo CD Image Updater (deploy/argocd/apps/image-updater.yaml).
+global:
+  image:
+    registry: ghcr.io/utku-kucuk
+
+host: partradar.utkukucuk.com
+scheme: https
+
+keycloak:
+  admin:
+    # SealedSecret in deploy/argocd/secrets.
+    existingSecret: keycloak-admin
+
+postgres:
+  storage: 10Gi

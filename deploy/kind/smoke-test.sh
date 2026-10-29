@@ -3,8 +3,8 @@
 # through the gateway, then a customer finds it with the nearby search.
 set -euo pipefail
 
-API=${API:-http://api.localtest.me}
-AUTH=${AUTH:-http://auth.localtest.me}
+API=${API:-http://partradar.localtest.me}
+AUTH=${AUTH:-http://partradar.localtest.me/auth}
 NAMESPACE=${NAMESPACE:-partradar}
 
 fail() {
@@ -26,12 +26,15 @@ shop='{"name":"Smoke Test Parts","phone":"+90 212 555 00 00","address":"Ikitelli
        "latitude":41.0712,"longitude":28.8026,"categories":["ENGINE","BRAKES"]}'
 
 # A pod that just turned ready can take a moment to be reachable through its Service (endpoint
-# propagation), so wait until a request travels ingress -> gateway -> shop-service and back.
+# propagation), so wait until Keycloak serves the realm and a request travels
+# ingress -> gateway -> shop-service and back.
 for _ in $(seq 1 60); do
+  realm=$(curl -s -o /dev/null -w '%{http_code}' "$AUTH/realms/partradar")
   status=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API/api/shops" -H 'Content-Type: application/json' -d "$shop")
-  [[ "$status" == 401 ]] && break
+  [[ "$realm" == 200 && "$status" == 401 ]] && break
   sleep 2
 done
+[[ "$realm" == 200 ]] || fail "Keycloak realm not reachable at $AUTH (HTTP $realm)"
 expect_status 401 "$status" "register without a token is rejected"
 
 sign_in() { # username

@@ -114,7 +114,7 @@ partradar/
 - [ ] Gateway with Keycloak and resilience
 - [ ] Observability
 - [x] Helm charts, kind cluster and end-to-end smoke test in CI
-- [ ] Live environment on Oracle Cloud (k3s + Argo CD)
+- [ ] Live environment on Oracle Cloud (k3s, Argo CD, Cloudflare Tunnel) — manifests ready, going live
 - [ ] Web app flows
 - [ ] `v0.1.0`
 
@@ -161,11 +161,19 @@ make k8s-down    # delete the cluster
 
 | What | URL |
 |---|---|
-| API gateway | http://api.localtest.me |
-| Keycloak | http://auth.localtest.me (`admin` / `admin`) |
+| API gateway | http://partradar.localtest.me/api |
+| Keycloak | http://partradar.localtest.me/auth (`admin` / `admin`) |
 
 `*.localtest.me` resolves to `127.0.0.1`; kind forwards port 80 to the ingress controller.
+The layout matches the live environment: one host, the gateway under `/api` and Keycloak under `/auth`.
 Images for `main` and every release are published to GHCR for `linux/amd64` and `linux/arm64`.
+
+### Live environment
+The same chart runs publicly on one Oracle Cloud *Always Free* VM with k3s: Argo CD deploys it from
+[`deploy/argocd`](deploy/argocd), Argo CD Image Updater rolls out every image built from `main`, and the site is
+reachable only through a Cloudflare Tunnel — the VM has no open ports besides SSH
+([ADR-0007](docs/adr/0007-free-live-environment.md), runbook in [`deploy/oracle`](deploy/oracle)).
+The public address will be `https://partradar.utkukucuk.com` (gateway under `/api`, Keycloak under `/auth`).
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md). Commits follow [Conventional Commits](https://www.conventionalcommits.org);
@@ -185,4 +193,5 @@ yönlendirilir, dükkânlar stok, fiyat ve teslim süresiyle teklif verir.
 
 Teknik olarak Java 25 / Spring Boot 4 ile yazılmış, Kafka (domain event'leri) ve RabbitMQ (bildirim komutları, retry/DLQ)
 kullanan, Kubernetes üzerinde Helm ile çalışan, event-driven bir microservices sistemidir. Mimari kararlar
-[`docs/adr`](docs/adr) altında gerekçeleriyle belgelenmiştir.
+[`docs/adr`](docs/adr) altında gerekçeleriyle belgelenmiştir. Canlı ortam, Oracle Cloud'un ücretsiz katmanında
+k3s üzerinde Argo CD ile GitOps olarak yönetilir ve yalnızca Cloudflare Tunnel üzerinden erişilir.

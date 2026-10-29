@@ -8,5 +8,5 @@ appVersion: "main"
 home: https://github.com/utku-kucuk/partradar
 dependencies:
   - name: partradar-service
-    version: 0.1.0
+    version: 0.2.0
     repository: file://../library/partradar-service

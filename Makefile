@@ -4,6 +4,10 @@ SHELL := /bin/bash
 COMPOSE  := docker compose -f deploy/compose/compose.yaml
 SERVICES := api-gateway shop-service inquiry-service notification-service
 SERVICE  ?= shop-service
+# Custom resources (Argo CD, CloudNativePG, ...) are validated against the community CRD schema catalog.
+# The catalog's ImageUpdater schema is older than the installed CRD, so that kind is skipped.
+KUBECONFORM := kubeconform -strict -summary -schema-location default \
+	-schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 
 .PHONY: help build test format infra-up infra-down infra-reset up down ps logs run images helm-lint k8s-up k8s-smoke k8s-down
 
@@ -52,10 +56,12 @@ run: infra-up ## Run one service from source against local infrastructure: make 
 	./mvnw -B spring-boot:run -pl services/$(SERVICE)
 
 ## --- Kubernetes (kind) ------------------------------------------------------
-helm-lint: ## Lint the Helm chart and validate the rendered manifests
+helm-lint: ## Lint the Helm chart and validate the rendered and Argo CD manifests
 	helm dependency build deploy/helm/partradar >/dev/null
 	helm lint deploy/helm/partradar -f deploy/helm/partradar/values-kind.yaml
-	helm template partradar deploy/helm/partradar | kubeconform -strict -ignore-missing-schemas -summary
+	helm lint deploy/helm/partradar -f deploy/helm/partradar/values-prod.yaml
+	helm template partradar deploy/helm/partradar -f deploy/helm/partradar/values-prod.yaml | $(KUBECONFORM)
+	$(KUBECONFORM) -skip ImageUpdater deploy/argocd/root.yaml deploy/argocd/apps deploy/argocd/cloudflared deploy/oracle/traefik-config.yaml
 
 k8s-up: ## Create a kind cluster, build the images and install the chart
 	deploy/kind/k8s-up.sh

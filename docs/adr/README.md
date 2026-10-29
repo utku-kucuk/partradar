@@ -8,3 +8,4 @@
 | [0004](0004-microservices.md) | Small set of microservices | Accepted |
 | [0005](0005-kafka-and-rabbitmq.md) | Kafka for domain events, RabbitMQ for commands | Accepted |
 | [0006](0006-kubernetes-with-helm.md) | Kubernetes with Helm, local cluster with kind | Accepted |
+| [0007](0007-free-live-environment.md) | Free live environment: Oracle Cloud, k3s, Argo CD, Cloudflare Tunnel | Accepted |

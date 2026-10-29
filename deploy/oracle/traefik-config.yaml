@@ -1,0 +1,19 @@
+# Customizes the Traefik bundled with k3s. Copied to /var/lib/rancher/k3s/server/manifests by bootstrap.sh.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    # Reached only by cloudflared inside the cluster; nothing listens on the VM's public interface.
+    service:
+      type: ClusterIP
+    ports:
+      web:
+        # Keep X-Forwarded-Proto/-For set by Cloudflare, so the services build https:// links.
+        forwardedHeaders:
+          trustedIPs: ["10.42.0.0/16"]
+      websecure:
+        expose:
+          default: false

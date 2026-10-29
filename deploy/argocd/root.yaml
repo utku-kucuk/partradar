@@ -1,0 +1,30 @@
+# Root of the app-of-apps: Argo CD applies every Application in deploy/argocd/apps.
+# Created once by deploy/oracle/bootstrap.sh; from then on everything comes from Git.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/utku-kucuk/partradar.git
+    targetRevision: main
+    path: deploy/argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  # Argo CD Image Updater sets image tags as Helm parameters on the partradar Application;
+  # keep them instead of reverting to Git.
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      name: partradar
+      jsonPointers:
+        - /spec/source/helm/parameters
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true

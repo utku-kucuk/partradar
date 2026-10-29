@@ -1,0 +1,14 @@
+# Argo CD for a single small cluster, served at https://argocd.utkukucuk.com behind Cloudflare Access.
+global:
+  domain: argocd.utkukucuk.com
+configs:
+  params:
+    # TLS ends at Cloudflare; the tunnel talks plain HTTP to the server.
+    server.insecure: true
+  cm:
+    # Poll Git every minute instead of the 3 minute default.
+    timeout.reconciliation: 60s
+dex:
+  enabled: false
+notifications:
+  enabled: false

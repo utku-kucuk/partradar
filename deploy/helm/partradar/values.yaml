@@ -5,19 +5,16 @@ global:
     tag: ""
     pullPolicy: IfNotPresent
 
-# Public host names. Tokens carry the issuer as the browser sees it, so services validate
-# against the public Keycloak URL and fetch signing keys inside the cluster.
-hosts:
-  api: api.partradar.local
-  auth: auth.partradar.local
-  scheme: https
+# Public URL: one host, the gateway under /api and Keycloak under /auth (the web app will take /).
+# Tokens carry the issuer as the browser sees it, so services validate against the public Keycloak URL
+# and fetch signing keys inside the cluster.
+host: partradar.local
+scheme: https
 
 ingress:
   enabled: true
   className: traefik
   annotations: {}
-  # Secret name for TLS; empty disables TLS on the Ingress.
-  tlsSecretName: ""
 
 postgres:
   # CloudNativePG cluster, one database per service (ADR-0004).
@@ -27,6 +24,7 @@ postgres:
   storage: 2Gi
   owner: partradar
   databases:
+    keycloak: {}
     shop:
       extensions: [postgis, pg_trgm]
     inquiry: {}
@@ -37,8 +35,10 @@ postgres:
 
 keycloak:
   image: quay.io/keycloak/keycloak:26.8.1
-  # Development mode with the realm imported on start; replaced by a production setup with its own database later.
+  # Production mode (`kc.sh start`) everywhere, with its own database; the realm is imported once.
   admin:
+    # Name of an existing Secret with keys username/password (e.g. a SealedSecret); empty creates one from the values below.
+    existingSecret: ""
     username: admin
     password: admin
   resources:
@@ -56,8 +56,8 @@ serviceDefaults:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 70
   env:
-    KEYCLOAK_ISSUER_URI: "{{ .Values.hosts.scheme }}://{{ .Values.hosts.auth }}/realms/partradar"
-    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/partradar/protocol/openid-connect/certs
+    KEYCLOAK_ISSUER_URI: "{{ .Values.scheme }}://{{ .Values.host }}/auth/realms/partradar"
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/auth/realms/partradar/protocol/openid-connect/certs
 
 services:
   api-gateway:

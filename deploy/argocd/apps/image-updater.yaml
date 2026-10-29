@@ -1,0 +1,56 @@
+# Rolls out every new image built from main: picks the newest sha-* tag per service and sets it as a
+# Helm parameter on the partradar Application (no commits to main).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-image-updater
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  project: default
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argocd-image-updater
+    targetRevision: 1.3.2
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+---
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: partradar
+  namespace: argocd
+  annotations:
+    # Created after the chart above has installed the CRD.
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  commonUpdateSettings:
+    updateStrategy: newest-build
+    allowTags: regexp:^sha-[0-9a-f]+$
+    platforms: [linux/arm64]
+  writeBackConfig:
+    method: argocd
+  applicationRefs:
+    - namePattern: partradar
+      images:
+        - alias: api-gateway
+          imageName: ghcr.io/utku-kucuk/partradar-api-gateway
+          manifestTargets: { helm: { tag: services.api-gateway.tag } }
+        - alias: shop-service
+          imageName: ghcr.io/utku-kucuk/partradar-shop-service
+          manifestTargets: { helm: { tag: services.shop-service.tag } }
+        - alias: inquiry-service
+          imageName: ghcr.io/utku-kucuk/partradar-inquiry-service
+          manifestTargets: { helm: { tag: services.inquiry-service.tag } }
+        - alias: notification-service
+          imageName: ghcr.io/utku-kucuk/partradar-notification-service
+          manifestTargets: { helm: { tag: services.notification-service.tag } }
