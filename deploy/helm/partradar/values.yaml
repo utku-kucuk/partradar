@@ -34,7 +34,7 @@ postgres:
     limits: { memory: 512Mi }
 
 keycloak:
-  image: quay.io/keycloak/keycloak:26.8.1
+  image: quay.io/keycloak/keycloak:26.8.2
   # Production mode (`kc.sh start`) everywhere, with its own database; the realm is imported once.
   admin:
     # Name of an existing Secret with keys username/password (e.g. a SealedSecret); empty creates one from the values below.
